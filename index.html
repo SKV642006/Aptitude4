@@ -1,0 +1,1014 @@
+# Simplified Gamified Aptitude Training Platform
+
+I've created a streamlined gamified aptitude training platform with a focus on the core quiz experience. The timer starts only when you begin the quiz and ends when all questions are completed. I've also significantly increased the number of questions and removed unnecessary features.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AptiTrain - Gamified Aptitude Training</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --success: #2ec4b6;
+            --warning: #ff9f1c;
+            --danger: #e71d36;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--gray);
+        }
+
+        .welcome-screen {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .start-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .start-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .quiz-container {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .quiz-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .timer {
+            font-size: 1.2rem;
+            background: var(--light);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .time-left {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .question-type {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            background: var(--light);
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+        }
+
+        .option:hover {
+            background: #e6f0ff;
+            border-color: var(--primary);
+        }
+
+        .option.selected {
+            background: #e6f0ff;
+            border-color: var(--primary);
+            border-width: 2px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .progress-container {
+            margin: 25px 0;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: var(--light-gray);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 6px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .feedback {
+            padding: 18px;
+            border-radius: 8px;
+            margin: 25px 0;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+            font-size: 1.1rem;
+        }
+
+        .feedback.correct {
+            background: #e6fff0;
+            color: var(--success);
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background: #ffe6e6;
+            color: var(--danger);
+            display: block;
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .result-title {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .result-score {
+            font-size: 4.5rem;
+            font-weight: bold;
+            margin: 25px 0;
+            color: var(--success);
+        }
+
+        .result-message {
+            font-size: 1.3rem;
+            margin-bottom: 35px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--gray);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-brain"></i> AptiTrain</h1>
+            <p class="subtitle">Sharpen your cognitive skills with gamified aptitude training</p>
+        </header>
+
+        <div class="welcome-screen" id="welcome-screen">
+            <h2>Welcome to AptiTrain!</h2>
+            <p style="font-size: 1.2rem; margin: 25px 0;">Test your aptitude skills with 50 challenging questions across Mathematics, Logic, and Verbal Reasoning.</p>
+            <p style="margin-bottom: 25px;">The timer will start when you begin the quiz and stop when you complete all questions.</p>
+            <button class="start-btn" id="start-btn"><i class="fas fa-play"></i> Start Quiz</button>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2 class="quiz-title">Aptitude Training</h2>
+                <div class="timer">Time: <span class="time-left" id="time-left">00:00</span></div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div style="text-align: center; font-size: 1.1rem;">
+                    Question <span id="current-question">1</span> of <span id="total-questions">50</span>
+                </div>
+            </div>
+            
+            <div class="question-container">
+                <div class="question-header">
+                    <div class="question-number">Question <span id="q-number">1</span></div>
+                    <div class="question-type" id="question-type">Mathematics</div>
+                </div>
+                
+                <div class="question-text" id="question-text">
+                    What is the value of 15 × (2 + 3) - 10?
+                </div>
+                
+                <div class="options-container" id="options-container">
+                    <div class="option" data-index="0">A) 65</div>
+                    <div class="option" data-index="1">B) 75</div>
+                    <div class="option" data-index="2">C) 85</div>
+                    <div class="option" data-index="3">D) 95</div>
+                </div>
+                
+                <div class="feedback" id="feedback"></div>
+                
+                <div class="controls">
+                    <button id="prev-btn" class="btn-secondary"><i class="fas fa-arrow-left"></i> Previous</button>
+                    <button id="submit-btn">Submit Answer</button>
+                    <button id="next-btn">Next <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="result-screen" id="result-screen">
+            <h2 class="result-title">Quiz Completed!</h2>
+            <div class="result-score" id="final-score">0</div>
+            <p class="result-message" id="result-message">Great job! You've completed the aptitude training session.</p>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-time">00:00</div>
+                    <div class="stat-label">TOTAL TIME</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracy">0%</div>
+                    <div class="stat-label">ACCURACY</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="correct">0</div>
+                    <div class="stat-label">CORRECT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="incorrect">0</div>
+                    <div class="stat-label">INCORRECT</div>
+                </div>
+            </div>
+            
+            <button id="restart-btn" class="start-btn"><i class="fas fa-redo"></i> Try Again</button>
+        </div>
+        
+        <footer>
+            <p>AptiTrain - Gamified Aptitude Training | Sharpen your mind with daily challenges</p>
+        </footer>
+    </div>
+
+    <script>
+        // Extensive question bank
+        const questions = [
+            {
+                type: "Mathematics",
+                question: "What is the value of 15 × (2 + 3) - 10?",
+                options: ["65", "75", "85", "95"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "If all Bloops are Razzies and all Razzies are Loppies, then all Bloops are definitely Loppies.",
+                options: ["True", "False", "Uncertain", "None of the above"],
+                answer: 0
+            },
+            {
+                type: "Verbal",
+                question: "What is the synonym of 'Ephemeral'?",
+                options: ["Eternal", "Brief", "Permanent", "Endless"],
+                answer: 1
+            },
+            {
+                type: "Mathematics",
+                question: "A train travels 120 km in 2 hours. What is its average speed?",
+                options: ["40 km/h", "50 km/h", "60 km/h", "70 km/h"],
+                answer: 2
+            },
+            {
+                type: "Logic",
+                question: "Which number should come next in the pattern? 1, 1, 2, 3, 5, 8, 13, ...",
+                options: ["18", "19", "21", "23"],
+                answer: 2
+            },
+            {
+                type: "Verbal",
+                question: "Complete the analogy: Book is to Reading as Fork is to ______.",
+                options: ["Cutting", "Eating", "Cooking", "Kitchen"],
+                answer: 1
+            },
+            {
+                type: "Mathematics",
+                question: "If the radius of a circle is 7 cm, what is its area? (Use π = 22/7)",
+                options: ["144 cm²", "154 cm²", "164 cm²", "174 cm²"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "If you rearrange the letters 'CIFAIPC' you would have the name of a:",
+                options: ["City", "Animal", "Ocean", "Country"],
+                answer: 2
+            },
+            {
+                type: "Verbal",
+                question: "What does the idiom 'Break the ice' mean?",
+                options: [
+                    "To make someone angry",
+                    "To start a conversation in a social setting",
+                    "To solve a difficult problem",
+                    "To end a relationship"
+                ],
+                answer: 1
+            },
+            {
+                type: "Verbal",
+                question: "Choose the correctly spelled word:",
+                options: ["Accomodate", "Accommodate", "Acommodate", "Acomodate"],
+                answer: 1
+            },
+            {
+                type: "Mathematics",
+                question: "What is 25% of 80?",
+                options: ["15", "20", "25", "30"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "If a doctor gives you 3 pills and tells you to take one every half hour, how long would it take before all the pills had been taken?",
+                options: ["1 hour", "1.5 hours", "2 hours", "2.5 hours"],
+                answer: 0
+            },
+            {
+                type: "Verbal",
+                question: "What is the antonym of 'Benevolent'?",
+                options: ["Malevolent", "Kind", "Generous", "Helpful"],
+                answer: 0
+            },
+            {
+                type: "Mathematics",
+                question: "If 3x + 5 = 20, what is the value of x?",
+                options: ["3", "5", "7", "9"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "Which word does not belong with the others?",
+                options: ["Guitar", "Flute", "Violin", "Cello"],
+                answer: 1
+            },
+            {
+                type: "Verbal",
+                question: "Choose the word that best completes the sentence: The politician's speech was full of _______ statements that sounded impressive but actually said very little of substance.",
+                options: ["Grandiose", "Grand", "Grandstand", "Grandiloquent"],
+                answer: 3
+            },
+            {
+                type: "Mathematics",
+                question: "A rectangle has a length of 12 cm and a width of 8 cm. What is its perimeter?",
+                options: ["32 cm", "40 cm", "48 cm", "96 cm"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "In a family, a boy has as many sisters as brothers, but each sister has only half as many sisters as brothers. How many brothers and sisters are there?",
+                options: ["4 brothers, 3 sisters", "3 brothers, 4 sisters", "4 brothers, 4 sisters", "3 brothers, 3 sisters"],
+                answer: 0
+            },
+            {
+                type: "Verbal",
+                question: "What is the meaning of the word 'Ubiquitous'?",
+                options: ["Unique", "Present everywhere", "Rare", "Ancient"],
+                answer: 1
+            },
+            {
+                type: "Mathematics",
+                question: "What is the next number in the sequence: 2, 6, 12, 20, 30, ...?",
+                options: ["40", "42", "44", "46"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "A man lives on the 20th floor of an apartment building. Every morning he takes the elevator down to the ground floor. When he comes home, he takes the elevator to the 10th floor and walks up the stairs to the 20th floor. Why?",
+                options: [
+                    "He's afraid of heights",
+                    "He's too short to reach the 20th floor button",
+                    "He enjoys walking",
+                    "The elevator only goes to the 10th floor"
+                ],
+                answer: 1
+            },
+            {
+                type: "Verbal",
+                question: "What is the synonym of 'Meticulous'?",
+                options: ["Careless", "Sloppy", "Precise", "Rough"],
+                answer: 2
+            },
+            {
+                type: "Mathematics",
+                question: "If 5 workers can build a wall in 10 days, how many days will it take 10 workers to build the same wall?",
+                options: ["5 days", "10 days", "15 days", "20 days"],
+                answer: 0
+            },
+            {
+                type: "Logic",
+                question: "Which number should come next in the series: 2, 1, (1/2), (1/4), ...?",
+                options: ["1/3", "1/8", "2/8", "1/16"],
+                answer: 1
+            },
+            {
+                type: "Verbal",
+                question: "What is the meaning of 'Cogent'?",
+                options: ["Weak", "Confusing", "Clear and convincing", "Ancient"],
+                answer: 2
+            },
+            {
+                type: "Mathematics",
+                question: "What is the area of a triangle with base 10 cm and height 6 cm?",
+                options: ["15 cm²", "30 cm²", "45 cm²", "60 cm²"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "If you see a car with the number '777' on its license plate, what is the probability that the next car you see will also have '777'?",
+                options: ["1/1000", "1/100", "1/10", "1/10000"],
+                answer: 0
+            },
+            {
+                type: "Verbal",
+                question: "Choose the word that best completes the sentence: The scientist's theory was so _______ that it revolutionized the field.",
+                options: ["Revolutionary", "Boring", "Complex", "Simple"],
+                answer: 0
+            },
+            {
+                type: "Mathematics",
+                question: "What is the square root of 144?",
+                options: ["10", "12", "14", "16"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost?",
+                options: ["$0.05", "$0.10", "$0.15", "$0.20"],
+                answer: 0
+            },
+            {
+                type: "Verbal",
+                question: "What is the antonym of 'Verbose'?",
+                options: ["Talkative", "Concise", "Wordy", "Loquacious"],
+                answer: 1
+            },
+            {
+                type: "Mathematics",
+                question: "If a car travels at 60 km/h for 2 hours and then at 40 km/h for 3 hours, what is the average speed for the whole journey?",
+                options: ["48 km/h", "50 km/h", "52 km/h", "54 km/h"],
+                answer: 0
+            },
+            {
+                type: "Logic",
+                question: "Which shape does not belong with the others?",
+                options: ["Circle", "Square", "Triangle", "Rectangle"],
+                answer: 0
+            },
+            {
+                type: "Verbal",
+                question: "What is the meaning of 'Pragmatic'?",
+                options: ["Idealistic", "Practical", "Theoretical", "Philosophical"],
+                answer: 1
+            },
+            {
+                type: "Mathematics",
+                question: "What is 15% of 200?",
+                options: ["25", "30", "35", "40"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "If it takes 5 machines 5 minutes to make 5 widgets, how long would it take 100 machines to make 100 widgets?",
+                options: ["5 minutes", "100 minutes", "20 minutes", "1 minute"],
+                answer: 0
+            },
+            {
+                type: "Verbal",
+                question: "What is the synonym of 'Eloquent'?",
+                options: ["Inarticulate", "Fluent", "Quiet", "Stammering"],
+                answer: 1
+            },
+            {
+                type: "Mathematics",
+                question: "What is the volume of a cube with side length 4 cm?",
+                options: ["16 cm³", "32 cm³", "64 cm³", "128 cm³"],
+                answer: 2
+            },
+            {
+                type: "Logic",
+                question: "A farmer had 17 sheep. All but 9 died. How many sheep did he have left?",
+                options: ["0", "8", "9", "17"],
+                answer: 2
+            },
+            {
+                type: "Verbal",
+                question: "What is the meaning of 'Ambiguous'?",
+                options: ["Clear", "Unclear", "Certain", "Definite"],
+                answer: 1
+            },
+            {
+                type: "Mathematics",
+                question: "If 2x - 7 = 13, what is the value of x?",
+                options: ["5", "10", "15", "20"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "Which word does not belong with the others?",
+                options: ["Apple", "Banana", "Orange", "Potato"],
+                answer: 3
+            },
+            {
+                type: "Verbal",
+                question: "What is the antonym of 'Serene'?",
+                options: ["Calm", "Peaceful", "Turbulent", "Tranquil"],
+                answer: 2
+            },
+            {
+                type: "Mathematics",
+                question: "What is the next number in the sequence: 1, 4, 9, 16, 25, ...?",
+                options: ["30", "36", "42", "49"],
+                answer: 1
+            },
+            {
+                type: "Logic",
+                question: "A woman has 7 children. Half of them are boys. How is this possible?",
+                options: [
+                    "She has 3.5 boys",
+                    "All are boys",
+                    "One is intersex",
+                    "All are girls"
+                ],
+                answer: 2
+            },
+            {
+                type: "Verbal",
+                question: "What is the synonym of 'Voracious'?",
+                options: ["Generous", "Starving", "Greedy", "Satisfied"],
+                answer: 2
+            },
+            {
+                type: "Mathematics",
+                question: "What is the circumference of a circle with diameter 14 cm? (Use π = 22/7)",
+                options: ["44 cm", "88 cm", "132 cm", "176 cm"],
+                answer: 0
+            },
+            {
+                type: "Logic",
+                question: "If you rearrange the letters 'RAPETEKA' you would have the name of a:",
+                options: ["Bird", "Vegetable", "City", "Animal"],
+                answer: 0
+            },
+            {
+                type: "Verbal",
+                question: "What is the meaning of 'Ephemeral'?",
+                options: ["Lasting a long time", "Lasting for a very short time", "Ancient", "Eternal"],
+                answer: 1
+            },
+            {
+                type: "Mathematics",
+                question: "If a = 3 and b = 4, what is the value of a² + b²?",
+                options: ["7", "12", "25", "49"],
+                answer: 2
+            },
+            {
+                type: "Logic",
+                question: "A man is looking at a photograph. Someone asks him, 'Whose picture are you looking at?' He replies, 'Brothers and sisters I have none, but that man's father is my father's son.' Who is in the photograph?",
+                options: [
+                    "His son",
+                    "His father",
+                    "Himself",
+                    "His uncle"
+                ],
+                answer: 0
+            }
+        ];
+
+        // Game state
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedOption = null;
+        let startTime = null;
+        let endTime = null;
+        let userAnswers = Array(questions.length).fill(null);
+        let timeElapsed = 0;
+        let timerInterval = null;
+
+        // DOM elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const questionType = document.getElementById('question-type');
+        const qNumber = document.getElementById('q-number');
+        const currentQuestionEl = document.getElementById('current-question');
+        const totalQuestionsEl = document.getElementById('total-questions');
+        const timeLeftEl = document.getElementById('time-left');
+        const feedbackEl = document.getElementById('feedback');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const progressFill = document.getElementById('progress-fill');
+        const finalScoreEl = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+        const totalTimeEl = document.getElementById('total-time');
+        const accuracyEl = document.getElementById('accuracy');
+        const correctEl = document.getElementById('correct');
+        const incorrectEl = document.getElementById('incorrect');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // Initialize game
+        function initGame() {
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = Array(questions.length).fill(null);
+            timeElapsed = 0;
+            
+            welcomeScreen.style.display = 'block';
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'none';
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // Start the quiz
+        function startQuiz() {
+            welcomeScreen.style.display = 'none';
+            quizContainer.style.display = 'block';
+            startTime = new Date();
+            startTimer();
+            loadQuestion();
+        }
+
+        // Timer functions
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeElapsed++;
+                updateTimeDisplay();
+            }, 1000);
+        }
+
+        function updateTimeDisplay() {
+            const minutes = Math.floor(timeElapsed / 60);
+            const seconds = timeElapsed % 60;
+            timeLeftEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Load current question
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            
+            questionText.textContent = question.question;
+            questionType.textContent = question.type;
+            qNumber.textContent = currentQuestion + 1;
+            currentQuestionEl.textContent = currentQuestion + 1;
+            totalQuestionsEl.textContent = questions.length;
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add new options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = `${String.fromCharCode(65 + index)}) ${option}`;
+                optionElement.dataset.index = index;
+                
+                optionElement.addEventListener('click', () => selectOption(index));
+                
+                // If user already answered this question, show their answer
+                if (userAnswers[currentQuestion] !== null) {
+                    if (index === userAnswers[currentQuestion]) {
+                        optionElement.classList.add('selected');
+                    }
+                    
+                    // Show correct/incorrect after submission
+                    if (userAnswers[currentQuestion] !== null) {
+                        if (index === question.answer) {
+                            optionElement.classList.add('correct');
+                        } else if (index === userAnswers[currentQuestion] && index !== question.answer) {
+                            optionElement.classList.add('incorrect');
+                        }
+                    }
+                }
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Reset UI
+            feedbackEl.className = 'feedback';
+            feedbackEl.style.display = 'none';
+            selectedOption = userAnswers[currentQuestion];
+            
+            // Update button states
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = currentQuestion === questions.length - 1;
+            submitBtn.disabled = userAnswers[currentQuestion] !== null;
+            
+            // Update progress
+            const progress = ((currentQuestion) / questions.length) * 100;
+            progressFill.style.width = `${progress}%`;
+        }
+
+        // Select an option
+        function selectOption(index) {
+            // If already answered, don't allow changing
+            if (userAnswers[currentQuestion] !== null) return;
+            
+            // Remove previous selection
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Select new option
+            const selectedElement = document.querySelector(`.option[data-index="${index}"]`);
+            selectedElement.classList.add('selected');
+            selectedOption = index;
+        }
+
+        // Submit answer
+        function submitAnswer() {
+            if (selectedOption === null) return;
+            
+            // Store user answer
+            userAnswers[currentQuestion] = selectedOption;
+            
+            // Get current question
+            const question = questions[currentQuestion];
+            const correct = selectedOption === question.answer;
+            
+            // Show feedback
+            feedbackEl.style.display = 'block';
+            if (correct) {
+                feedbackEl.textContent = 'Correct!';
+                feedbackEl.className = 'feedback correct';
+                score += 10;
+            } else {
+                feedbackEl.textContent = `Incorrect. The correct answer was: ${String.fromCharCode(65 + question.answer)}) ${question.options[question.answer]}`;
+                feedbackEl.className = 'feedback incorrect';
+            }
+            
+            // Update UI
+            loadQuestion();
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            
+            // Move to next question automatically after delay
+            setTimeout(() => {
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion();
+                } else {
+                    endQuiz();
+                }
+            }, 1500);
+        }
+
+        // End the quiz
+        function endQuiz() {
+            endTime = new Date();
+            clearInterval(timerInterval);
+            
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'block';
+            
+            finalScoreEl.textContent = score;
+            
+            // Calculate results
+            const totalQuestions = questions.length;
+            const correctAnswers = userAnswers.reduce((count, answer, index) => {
+                return answer === questions[index].answer ? count + 1 : count;
+            }, 0);
+            const incorrectAnswers = totalQuestions - correctAnswers;
+            const accuracy = Math.round((correctAnswers / totalQuestions) * 100);
+            
+            // Display results
+            totalTimeEl.textContent = timeLeftEl.textContent;
+            accuracyEl.textContent = `${accuracy}%`;
+            correctEl.textContent = correctAnswers;
+            incorrectEl.textContent = incorrectAnswers;
+            
+            // Determine result message
+            if (accuracy >= 90) {
+                resultMessage.textContent = "Outstanding! You're an aptitude master!";
+            } else if (accuracy >= 75) {
+                resultMessage.textContent = "Excellent! Your cognitive skills are impressive!";
+            } else if (accuracy >= 60) {
+                resultMessage.textContent = "Great job! You have strong aptitude skills!";
+            } else if (accuracy >= 40) {
+                resultMessage.textContent = "Good effort! Keep practicing to improve!";
+            } else {
+                resultMessage.textContent = "Nice try! Practice makes perfect!";
+            }
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startQuiz);
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            }
+        });
+
+        submitBtn.addEventListener('click', submitAnswer);
+        restartBtn.addEventListener('click', initGame);
+
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>
+```
